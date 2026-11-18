@@ -14,7 +14,7 @@ export const ASSET_NAMES = {
 /** Folder name users get after extracting the extension zip. */
 export const EXTENSION_FOLDER = "tab-muncher-extension";
 
-const latest = (file: string) => `https://github.com/${GITHUB_REPO}/releases/latest/download/${file}`;
+// const latest = (file: string) => `https://github.com/${GITHUB_REPO}/releases/latest/download/${file}`;
 
 export const LINKS = {
   exe: "Tab.Muncher_0.1.0_x64-setup.exe",
