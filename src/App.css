@@ -1,0 +1,338 @@
+/* Transparent full-screen overlay. Only the mascot (and its menu) receive the mouse;
+   everything else is click-through at the OS level (see src-tauri/src/overlay.rs). */
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: Fredoka, "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.stage {
+  position: fixed;
+  overflow: hidden; /* lets the mascot "peek" in from screen edges, like the playground card */
+  pointer-events: none;
+}
+
+.fill {
+  width: 100%;
+  height: 100%;
+}
+
+.fx-abs {
+  position: absolute;
+  pointer-events: none;
+}
+.fx-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ---------- mascot */
+.mascot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+.mascot__body {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  touch-action: none;
+}
+.mascot__shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.15);
+  filter: blur(3px);
+}
+
+/* ---------- speech bubble / zzz / hearts */
+.bubble {
+  white-space: nowrap;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #fff;
+  color: #1e293b;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+.bubble--warn {
+  background: #fffbeb;
+  color: #78350f;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1), 0 0 0 1px #fcd34d;
+}
+.zzz {
+  position: absolute;
+  font-weight: 700;
+  color: #818cf8;
+}
+.heart {
+  color: #ec4899;
+}
+
+/* ---------- ghost of a just-closed Chrome tab */
+.ghost-tab {
+  position: absolute;
+  z-index: 20;
+  border-radius: 10px 10px 0 0;
+  background: #fff;
+  box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+.ghost-tab__x {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #f43f5e;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+}
+
+/* ---------- right-click mascot menu */
+.menu-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 49;
+  pointer-events: auto;
+}
+.menu {
+  position: absolute;
+  z-index: 50;
+  pointer-events: auto;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 18px 40px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  color: #1e293b;
+  font-size: 12.5px;
+}
+.menu button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.menu__label {
+  margin: 0 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+.menu__mascots {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.menu__mascot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0 3px;
+  border-radius: 10px;
+  font-size: 10.5px !important;
+}
+.menu__mascot img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.menu__mascot:hover {
+  background: #f1f5f9;
+}
+.menu__mascot.is-active {
+  background: color-mix(in srgb, var(--accent) 16%, white);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+.menu__row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 4px;
+  border-radius: 8px;
+}
+.menu__row:hover {
+  background: #f1f5f9;
+}
+.menu__hint {
+  color: #64748b;
+}
+.switch {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  transition: background 0.15s;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: left 0.15s;
+}
+.switch.is-on {
+  background: #1e293b;
+}
+.switch.is-on::after {
+  left: 16px;
+}
+.menu__stat {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding: 7px 4px 2px;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+}
+.menu__stat b {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* ---------- first-launch picker */
+.welcome {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 60;
+  width: min(520px, calc(100vw - 32px));
+  box-sizing: border-box;
+  margin: 0;
+  translate: -50% -50%;
+  padding: 26px 26px 22px;
+  border-radius: 24px;
+  background: #fffdf8;
+  color: #1e1b3a;
+  box-shadow: 0 30px 70px -20px rgba(30, 27, 58, 0.45), 0 0 0 1px rgba(30, 27, 58, 0.08);
+  pointer-events: auto;
+}
+.welcome button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.welcome h1 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.welcome__lead {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #5b5875;
+}
+.welcome__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: #8a87a3 !important;
+}
+.welcome__close:hover {
+  background: #f1eef8 !important;
+}
+.welcome__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.welcome__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 4px 8px;
+  border-radius: 16px;
+  background: #f6f3ee !important;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.welcome__tile:hover {
+  transform: translateY(-2px);
+}
+.welcome__tile.is-active {
+  background: color-mix(in srgb, var(--accent) 14%, white) !important;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.welcome__art {
+  height: 72px;
+  display: grid;
+  place-items: end center;
+}
+.welcome__tile b {
+  font-size: 13px;
+  font-weight: 600;
+}
+.welcome__tile span {
+  font-size: 10.5px;
+  color: #8a87a3;
+}
+.welcome__hint {
+  margin: 16px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f1eef8;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #45425e;
+}
+.welcome__kbd {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(30, 27, 58, 0.15), 0 0 0 1px rgba(30, 27, 58, 0.1);
+  font-weight: 600;
+}
+.welcome__go {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  background: #1e1b3a !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  box-shadow: 0 4px 0 #0d0b1f;
+}
+.welcome__go:active {
+  translate: 0 2px;
+  box-shadow: 0 2px 0 #0d0b1f;
+}

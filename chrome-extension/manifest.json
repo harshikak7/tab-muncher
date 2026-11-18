@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Muncher Bridge",
+  "version": "0.1.0",
+  "description": "Streams tab activity (counts, order, active tab, window bounds) to the Tab Muncher desktop mascot on this computer.",
+  "minimum_chrome_version": "116",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["alarms"],
+  "icons": {
+    "32": "icons/icon32.png",
+    "128": "icons/icon128.png"
+  }
+}
